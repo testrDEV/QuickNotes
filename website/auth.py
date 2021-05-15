@@ -1,5 +1,10 @@
-from flask import Blueprint, render_template, request, flash
+from website.models import User
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from werkzeug.datastructures import CharsetAccept
+from .models import User
+from werkzeug.security import generate_password_hash, check_password_hash
+from . import db
+
 
 auth = Blueprint('auth', __name__)
 
@@ -34,6 +39,11 @@ def sign_up():
             flash('Password too short, atleast  8 characters are required',
                   category='error')
         else:
+            new_user = User(email=email, userName=firstName, password=generate_password_hash(
+                password1, method='sha256'))
+            db.session.add(new_user)
+            db.session.commit()
             flash('User added', category=' success')  # add user to database
+            return redirect(url_for('views.home'))
 
     return render_template("sign_up.html")
